@@ -2,8 +2,15 @@ import Jimp from "jimp";
 import * as path from "path";
 import { exec } from "child_process";
 
+const config = require("../config.json");
+console.log(config);
+
 const writeTo = path.resolve(__dirname, "../release/output.jpeg");
 const readFrom = path.resolve(__dirname, "../bin/background.jpg");
+
+async function getWeather() {
+
+}
 
 async function makeImage(image: Jimp, font: any) {
     image.print(font, 200, 200, "Now this is actualy is the overlaydddd");
