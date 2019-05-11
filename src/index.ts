@@ -1,5 +1,4 @@
 import Jimp from "jimp";
-import * as fs from "fs";
 import * as path from "path";
 import { exec } from "child_process";
 
@@ -15,17 +14,10 @@ async function makeImage(image: Jimp, font: any) {
 }
 
 async function setBackground() {
-    const output = fs.existsSync(writeTo);
-    // const p = path.resolve(writeTo);
-
-    console.log(writeTo);
-    console.log(output);
 
     const osa = `osascript -e 'tell application "Finder" to set desktop picture to POSIX file "${writeTo}"' && killall Dock`
     console.log(osa);
     exec(osa);
-    // const osaRunP = exec(osa);
-    // const result = await osaRunP;
 }
 
 async function start() {
