@@ -10,7 +10,7 @@ const config = require("../config.json");
 const writeTo = path.resolve(__dirname, "../release/output.jpeg");
 const readFrom = path.resolve(__dirname, "../bin/background.jpg");
 
-const TextStart = 300;
+const TextStart = 550;
 const SVGStart = 250;
 
 async function getWeather(zipcode: number): Promise<IWeatherResponse> {
@@ -28,16 +28,19 @@ async function getWeather(zipcode: number): Promise<IWeatherResponse> {
 }
 
 async function makeImage(image: Jimp, font: any, weather: string, hourly: IWeatherHourlyData[]) {
-    image.print(font, TextStart, 200, weather);
-
     for (let i = 0; i < 12; i++) {
-        const date = new Date(hourly[i].time*1000);
-        const hours = (date.getHours() % 12);
+        const hour = hourly[i];
+
+        const date = new Date(hour.time*1000);
+        let hours = (date.getHours() % 12)
+        hours = (hours === 0 ) ? 12 : hours;
         const pm = (date.getHours() > 12)
         const space = (hours < 10);
-        console.log(hourly[i].summary);
-        pickWeather(hourly[i].icon);
-        image.print(font, TextStart, 200 + (i + 1)*100, `${hours} ${space ? "  ": ""} ${pm ? "PM" : "AM"} Temp: ${hourly[i].temperature}... Rain: ${hourly[i].precipProbability}`);
+
+        pickWeather(hour.icon);
+        const height = 200 + i*175;
+        image.print(font, TextStart, height, `${hours}${space ? "  ": ""}${pm ? "pm" : "am"}... ${hour.temperature.toPrecision(3)}${String.fromCharCode(176)}... Rain: ${(hour.precipProbability * 100).toPrecision(2)}%`);
+        image.composite(await Jimp.read(pickWeather(hour.icon)), SVGStart, height - 120);
     }
     image
         .write(writeTo);
@@ -46,11 +49,7 @@ async function makeImage(image: Jimp, font: any, weather: string, hourly: IWeath
 }
 
 async function setBackground() {
-
     const osa = `osascript -e 'tell application "Finder" to set desktop picture to POSIX file "${writeTo}"' && killall Dock`
-    // const osa = `osascript -e 'tell application "Finder" to set desktop picture to POSIX file "${writeTo}"'`;
-
-    console.log(osa);
     exec(osa);
 }
 
@@ -58,29 +57,29 @@ function pickWeather(icon: string): string {
 
     switch(icon) {
         case "clear-day": {
-            return path.resolve(__dirname, "../bin/Sun.svg");
+            return path.resolve(__dirname, "../bin/common/Sun.png");
         }
         case "clear-night": {
-            return path.resolve(__dirname, "../bin/Moon.svg");
+            return path.resolve(__dirname, "../bin/common/Moon.png");
         }
         case "rain": {
-            return path.resolve(__dirname, "../bin/Cloud-Rain.svg");
+            return path.resolve(__dirname, "../bin/common/Cloud-Rain.png");
         }
         case "sleet":
         case "snow": {
-            return path.resolve(__dirname, "../bin/Cloud-Snow.svg");
+            return path.resolve(__dirname, "../bin/common/Cloud-Snow.png");
         }
         case "wind": {
-            return path.resolve(__dirname, "../bin/Wind.svg");
+            return path.resolve(__dirname, "../bin/common/Wind.png");
         }
         case "fog": {
-            return path.resolve(__dirname, "../bin/Cloud-Fog-Sun.svg");
+            return path.resolve(__dirname, "../bin/common/Cloud-Fog-Sun.png");
         }
         case "partly-cloudy-day": {
-            return path.resolve(__dirname, "../bin/Cloud-Sun.svg");
+            return path.resolve(__dirname, "../bin/common/Cloud-Sun.png");
         }
         case "partly-cloudy-night": {
-            return path.resolve(__dirname, "../bin/Cloud-Moon.svg");
+            return path.resolve(__dirname, "../bin/common/Cloud-Moon.png");
         }
     }
 }
@@ -90,6 +89,8 @@ async function start() {
     const fontP = Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
     const weather = await getWeather(98112);
     const hourlyData = weather.hourly.data;
+
+
 
     Promise.all([imageP, fontP])
         .then(([image, font]) => {
