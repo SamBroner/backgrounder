@@ -1,4 +1,15 @@
-import { IWeatherMinutely } from './IWeatherResponse';
+export enum IWeatherEnum {
+    "clear-day",
+    "clear-night",
+    "rain",
+    "snow",
+    "sleet",
+    "wind",
+    "fog",
+    "cloudy",
+    "partly-cloudy-day",
+    "partly-cloudy-night",
+}
 
 export interface IWeatherResponse {
     latitude: number;
@@ -51,10 +62,6 @@ export interface IWeatherMinutelyData {
     precipIntensityError: number;
     precipProbability: number;
     precipType: string;
-}
-
-export interface IWeatherMinutelyData {
-
 }
 
 export interface IWeatherHourly {

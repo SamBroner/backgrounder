@@ -10,6 +10,9 @@ const config = require("../config.json");
 const writeTo = path.resolve(__dirname, "../release/output.jpeg");
 const readFrom = path.resolve(__dirname, "../bin/background.jpg");
 
+const TextStart = 300;
+const SVGStart = 250;
+
 async function getWeather(zipcode: number): Promise<IWeatherResponse> {
     const zipcodeInfo = zipcodes.lookup(zipcode);
     const long = zipcodeInfo.longitude;
@@ -25,15 +28,16 @@ async function getWeather(zipcode: number): Promise<IWeatherResponse> {
 }
 
 async function makeImage(image: Jimp, font: any, weather: string, hourly: IWeatherHourlyData[]) {
-    image.print(font, 250, 200, weather);
+    image.print(font, TextStart, 200, weather);
 
     for (let i = 0; i < 12; i++) {
         const date = new Date(hourly[i].time*1000);
         const hours = (date.getHours() % 12);
         const pm = (date.getHours() > 12)
         const space = (hours < 10);
-
-        image.print(font, 250, 200 + (i + 1)*100, `${hours} ${space ? "  ": ""} ${pm ? "PM" : "AM"} Temp: ${hourly[i].temperature}... Rain: ${hourly[i].precipProbability}`);
+        console.log(hourly[i].summary);
+        pickWeather(hourly[i].icon);
+        image.print(font, TextStart, 200 + (i + 1)*100, `${hours} ${space ? "  ": ""} ${pm ? "PM" : "AM"} Temp: ${hourly[i].temperature}... Rain: ${hourly[i].precipProbability}`);
     }
     image
         .write(writeTo);
@@ -48,6 +52,37 @@ async function setBackground() {
 
     console.log(osa);
     exec(osa);
+}
+
+function pickWeather(icon: string): string {
+
+    switch(icon) {
+        case "clear-day": {
+            return path.resolve(__dirname, "../bin/Sun.svg");
+        }
+        case "clear-night": {
+            return path.resolve(__dirname, "../bin/Moon.svg");
+        }
+        case "rain": {
+            return path.resolve(__dirname, "../bin/Cloud-Rain.svg");
+        }
+        case "sleet":
+        case "snow": {
+            return path.resolve(__dirname, "../bin/Cloud-Snow.svg");
+        }
+        case "wind": {
+            return path.resolve(__dirname, "../bin/Wind.svg");
+        }
+        case "fog": {
+            return path.resolve(__dirname, "../bin/Cloud-Fog-Sun.svg");
+        }
+        case "partly-cloudy-day": {
+            return path.resolve(__dirname, "../bin/Cloud-Sun.svg");
+        }
+        case "partly-cloudy-night": {
+            return path.resolve(__dirname, "../bin/Cloud-Moon.svg");
+        }
+    }
 }
 
 async function start() {
