@@ -39,7 +39,11 @@ async function makeImage(image: Jimp, font: any, weather: string, hourly: IWeath
 
         pickWeather(hour.icon);
         const height = 200 + i*175;
-        image.print(font, TextStart, height, `${hours}${space ? "  ": ""}${pm ? "pm" : "am"}... ${hour.temperature.toPrecision(3)}${String.fromCharCode(176)}... Rain: ${(hour.precipProbability * 100).toPrecision(2)}%`);
+        const temp = hour.temperature.toPrecision(3) + String.fromCharCode(176);
+        const rain = (hour.precipProbability * 100) < 10 ? (hour.precipProbability * 100).toPrecision(1) : (hour.precipProbability * 100).toPrecision(2);
+        console.log(hour.precipProbability);
+        console.log(rain);
+        image.print(font, TextStart, height, `${hours}${space ? "  ": ""}${pm ? "pm" : "am"}... ${temp}... Rain: ${rain}%`);
         image.composite(await Jimp.read(pickWeather(hour.icon)), SVGStart, height - 120);
     }
     image
@@ -80,6 +84,9 @@ function pickWeather(icon: string): string {
         }
         case "partly-cloudy-night": {
             return path.resolve(__dirname, "../bin/common/Cloud-Moon.png");
+        }
+        case "cloudy": { // Fix
+            return path.resolve(__dirname, "../bin/common/Cloud-Fog-Sun.png");
         }
     }
 }
