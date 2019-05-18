@@ -2,7 +2,6 @@ import * as fetch from "node-fetch";
 import { IWeatherResponse } from './IWeatherResponse';
 import * as path from "path";
 
-const zipcodes = require("zipcodes");
 const config = require("../config.json");
 
 export interface IForecast {
@@ -10,8 +9,9 @@ export interface IForecast {
     description: string;
 }
 
-export async function getWeatherStrings(zipcode: number): Promise<IForecast[]> {
-    const weather = await getWeather(zipcode);
+export async function getWeatherStrings(lat: number, long: number): Promise<IForecast[]> {
+
+    const weather = await getWeather(lat, long);
     const hourly = weather.hourly.data;
     const forecastStrings: IForecast[] = new Array();
 
@@ -36,11 +36,8 @@ export async function getWeatherStrings(zipcode: number): Promise<IForecast[]> {
     return forecastStrings;
 }
 
-async function getWeather(zipcode: number): Promise<IWeatherResponse> {
-    const zipcodeInfo = zipcodes.lookup(zipcode);
-    const long = zipcodeInfo.longitude;
-    const lat = zipcodeInfo.latitude;
-    const coordinates = lat + "," + long;
+async function getWeather(latitude: number, longitude: number): Promise<IWeatherResponse> {
+    const coordinates = latitude + "," + longitude;
 
     return await fetch.default("https://api.darksky.net/forecast/" + 
             config.darkSkyKey + "/" + coordinates)
