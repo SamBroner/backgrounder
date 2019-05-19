@@ -9,17 +9,19 @@ export interface IForecast {
     description: string;
 }
 
-export function getTime(unixTime: number): { hours: number, minutes: number, pm: boolean } {
+export function getTime(unixTime: number): { hours: number, minutes: string, pm: boolean } {
 
     const date = new Date(unixTime);
 
     let hours = (date.getHours() % 12)
     hours = (hours === 0) ? 12 : hours;
 
+    // Add 0 to minutes less than 10
+    const minutes = (date.getMinutes() < 10) ? `0${date.getMinutes()}` : date.getMinutes().toString();
 
     return {
         hours: hours,
-        minutes: date.getMinutes(),
+        minutes: minutes,
         pm: (date.getHours() > 12)
     };
 }
