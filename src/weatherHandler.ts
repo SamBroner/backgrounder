@@ -9,6 +9,21 @@ export interface IForecast {
     description: string;
 }
 
+export function getTime(unixTime: number): { hours: number, minutes: number, pm: boolean } {
+
+    const date = new Date(unixTime);
+
+    let hours = (date.getHours() % 12)
+    hours = (hours === 0) ? 12 : hours;
+
+
+    return {
+        hours: hours,
+        minutes: date.getMinutes(),
+        pm: (date.getHours() > 12)
+    };
+}
+
 export async function getWeatherStrings(lat: number, long: number): Promise<IForecast[]> {
 
     const weather = await getWeather(lat, long);
@@ -19,18 +34,15 @@ export async function getWeatherStrings(lat: number, long: number): Promise<IFor
         const hour = hourly[i];
 
         // Set to Unix Time
-        const date = new Date(hour.time*1000);
+        const time = getTime(hour.time * 1000);
+        const space = (time.hours < 10);
 
-        let hours = (date.getHours() % 12)
-        hours = (hours === 0 ) ? 12 : hours;
-        const pm = (date.getHours() > 12)
-        const space = (hours < 10);
         const temp = hour.temperature.toPrecision(3) + String.fromCharCode(176);
         const rain = (hour.precipProbability * 100) < 10 ? (hour.precipProbability * 100).toPrecision(1) : (hour.precipProbability * 100).toPrecision(2);
-        
+
         forecastStrings.push({
             path: pickWeatherPath(hour.icon),
-            description: `${hours}${space ? "  ": ""}${pm ? "pm" : "am"} | ${temp} | Rain: ${rain}%`
+            description: `${time.hours}${space ? "  " : ""}${time.pm ? "pm" : "am"} | ${temp} | Rain: ${rain}%`
         });
     }
     return forecastStrings;
@@ -39,8 +51,8 @@ export async function getWeatherStrings(lat: number, long: number): Promise<IFor
 async function getWeather(latitude: number, longitude: number): Promise<IWeatherResponse> {
     const coordinates = latitude + "," + longitude;
 
-    return await fetch.default("https://api.darksky.net/forecast/" + 
-            config.darkSkyKey + "/" + coordinates)
+    return await fetch.default("https://api.darksky.net/forecast/" +
+        config.darkSkyKey + "/" + coordinates)
         .then(res => {
             return res.json();
         });
@@ -48,7 +60,7 @@ async function getWeather(latitude: number, longitude: number): Promise<IWeather
 
 function pickWeatherPath(icon: string): string {
 
-    switch(icon) {
+    switch (icon) {
         case "clear-day": {
             return path.resolve(__dirname, "../bin/common/Sun.png");
         }
