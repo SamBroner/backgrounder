@@ -5,13 +5,22 @@ A simple node app to embed weather into your MacOS wallpaper.
 Dark-Sky key not included, I'll need to figure out some way handling their requirements
 
 ## Set up
+### Start
+Run the following and then walk through the command prompt!
+
+    npm install
+    npm run start
+  
+
 ### Test
 To test or debug backgrounder use the following:
 
     npm install
-    npm start
+    npm run test
+    
+## Background Info
 
-### Start
+### Notes on the Chron job
 To run as a background task, you'll need to use launchd and a tweek an included plist file.
 
 Look at [com.launched.weathergenerator.plist](./bin/com.launched.weathergenerator.plist) 
