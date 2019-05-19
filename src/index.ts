@@ -1,51 +1,30 @@
-import { IWeatherResponse, IWeatherHourlyData } from './IWeatherResponse';
 import Jimp from "jimp";
 import * as path from "path";
+import { IForecast, getWeatherStrings, getTime} from "./weatherHandler";
 import { exec } from "child_process";
-import * as fetch from "node-fetch";
-
-const zipcodes = require("zipcodes");
-const config = require("../config.json");
 
 const writeTo = path.resolve(__dirname, "../release/output.jpeg");
 const readFrom = path.resolve(__dirname, "../bin/background.jpg");
 
-const TextStart = 550;
-const SVGStart = 250;
+const ForecastStartY = 200;
+const ForecastRowHeight = 175;
+const TextStartX = 550;
+const SVGStartX = 250;
 
-async function getWeather(zipcode: number): Promise<IWeatherResponse> {
-    const zipcodeInfo = zipcodes.lookup(zipcode);
-    const long = zipcodeInfo.longitude;
-    const lat = zipcodeInfo.latitude;
-    const coordinates = lat + "," + long;
-    console.log(lat + "," + long);
-
-    return await fetch.default("https://api.darksky.net/forecast/" + 
-            config.darkSkyKey + "/" + coordinates)
-        .then(res => {
-            return res.json();
-        });
-}
-
-async function makeImage(image: Jimp, font: any, weather: string, hourly: IWeatherHourlyData[]) {
+async function makeImage(image: Jimp, font: any, forecast: IForecast[], city: string) {
+    // image.print(font, TextStartX - 50, 150, `${city} Forecast`);
     for (let i = 0; i < 12; i++) {
-        const hour = hourly[i];
-
-        const date = new Date(hour.time*1000);
-        let hours = (date.getHours() % 12)
-        hours = (hours === 0 ) ? 12 : hours;
-        const pm = (date.getHours() > 12)
-        const space = (hours < 10);
-
-        pickWeather(hour.icon);
-        const height = 200 + i*175;
-        const temp = hour.temperature.toPrecision(3) + String.fromCharCode(176);
-        const rain = (hour.precipProbability * 100) < 10 ? (hour.precipProbability * 100).toPrecision(1) : (hour.precipProbability * 100).toPrecision(2);
-        console.log(hour.precipProbability);
-        console.log(rain);
-        image.print(font, TextStart, height, `${hours}${space ? "  ": ""}${pm ? "pm" : "am"}... ${temp}... Rain: ${rain}%`);
-        image.composite(await Jimp.read(pickWeather(hour.icon)), SVGStart, height - 120);
+        const height = ForecastStartY + i * ForecastRowHeight;
+        image.print(font, TextStartX, height, forecast[i].description);
+        image.composite(await Jimp.read(forecast[i].path), SVGStartX, height - 120);
     }
+    
+    const date = Date.now();
+    const time = getTime(date);
+    image.print(await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK),
+                TextStartX,
+                ForecastStartY + 12 * ForecastRowHeight - 70,
+                `Forecast for ${city} @ ${time.hours}:${time.minutes}`);
     image
         .write(writeTo);
 
@@ -57,52 +36,20 @@ async function setBackground() {
     exec(osa);
 }
 
-function pickWeather(icon: string): string {
-
-    switch(icon) {
-        case "clear-day": {
-            return path.resolve(__dirname, "../bin/common/Sun.png");
-        }
-        case "clear-night": {
-            return path.resolve(__dirname, "../bin/common/Moon.png");
-        }
-        case "rain": {
-            return path.resolve(__dirname, "../bin/common/Cloud-Rain.png");
-        }
-        case "sleet":
-        case "snow": {
-            return path.resolve(__dirname, "../bin/common/Cloud-Snow.png");
-        }
-        case "wind": {
-            return path.resolve(__dirname, "../bin/common/Wind.png");
-        }
-        case "fog": {
-            return path.resolve(__dirname, "../bin/common/Cloud-Fog-Sun.png");
-        }
-        case "partly-cloudy-day": {
-            return path.resolve(__dirname, "../bin/common/Cloud-Sun.png");
-        }
-        case "partly-cloudy-night": {
-            return path.resolve(__dirname, "../bin/common/Cloud-Moon.png");
-        }
-        case "cloudy": { // Fix
-            return path.resolve(__dirname, "../bin/common/Cloud-Fog-Sun.png");
-        }
-    }
-}
-
-async function start() {
+async function changeBackground(zipcode: number) {
     const imageP = Jimp.read(readFrom);
     const fontP = Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
-    const weather = await getWeather(98112);
-    const hourlyData = weather.hourly.data;
+    const zipcodes = require("zipcodes");
+    const zipInfo = zipcodes.lookup(zipcode);
 
+    const weatherP = getWeatherStrings(zipInfo.latitude, zipInfo.longitude);
 
-
-    Promise.all([imageP, fontP])
-        .then(([image, font]) => {
-            makeImage(image, font, weather.currently.summary, hourlyData);
+    Promise.all([imageP, fontP, weatherP])
+        .then(([image, font, weather]) => {
+            makeImage(image, font, weather, `${zipInfo.city}, ${zipInfo.state}`)
+                .then(() => setBackground()) // Actually change the background
+                .catch((err) => console.error(err))
         })
 }
 
-start();
+changeBackground(98112);

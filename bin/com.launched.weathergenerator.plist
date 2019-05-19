@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+
+    <key>Label</key>
+    <string>com.launched.weathergenerator.plist</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+    </array>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/samuelbroner/Code/backgrounder/logs/stderr.log</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/samuelbroner/Code/backgrounder/logs/stdout.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>PATH</key>
+      <string><![CDATA[/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin]]></string>
+    </dict>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/samuelbroner/Code/backgrounder</string>
+
+    <key>ProgramArguments</key>
+    <array>
+      <string>/Users/samuelbroner/.npm-global/bin/npm</string>
+      <string>start</string>
+    </array>
+
+  </dict>
+  </plist>
