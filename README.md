@@ -4,6 +4,8 @@ A simple node app to embed weather into your MacOS wallpaper.
 
 Dark-Sky key not included, I'll need to figure out some way handling their requirements
 
+![Image of Backgrounder](./bin/example.jpg)
+
 ## Set up
 ### Start
 Run the following and then walk through the command prompt. To change the zip code just run this again.
