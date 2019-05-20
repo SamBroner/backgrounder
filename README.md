@@ -1,8 +1,8 @@
 # Backgrounder
 
-A simple node app to embed weather into your MacOS wallpaper.
+A simple node app to embed weather into your MacOS wallpaper. Also a brief exploration of photo editing and chron jobs on Mac.
 
-Dark-Sky key not included, I'll need to figure out some way handling their requirements. You can get your own here: https://darksky.net/
+DarkSky api key not included, I'll need to figure out some way of handling their requirements. You can get your own key: https://darksky.net/
 
 ![Image of Backgrounder](./bin/example.jpg)
 
@@ -13,6 +13,7 @@ Run the following and then walk through the command prompt. To change the zip co
     npm install
     npm run start
   
+#### Note: You'll need to change the config to have a darksky api key
 
 ### Test
 To test or debug backgrounder use the following:
@@ -23,7 +24,7 @@ To test or debug backgrounder use the following:
 ## Background Info
 
 ### Weather API
-We're using the Dark Sky API to power our forecasts.
+We're using the Dark Sky API to power our forecasts. Dark Sky Rocks!
 
 ### Notes on the Chron job
 
