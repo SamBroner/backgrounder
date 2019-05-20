@@ -6,7 +6,7 @@ Dark-Sky key not included, I'll need to figure out some way handling their requi
 
 ## Set up
 ### Start
-Run the following and then walk through the command prompt!
+Run the following and then walk through the command prompt. To change the zip code just run this again.
 
     npm install
     npm run start
@@ -20,7 +20,13 @@ To test or debug backgrounder use the following:
     
 ## Background Info
 
+### Weather API
+We're using the Dark Sky API to power our forecasts.
+
 ### Notes on the Chron job
+
+#### This all happens as part of the prompt script, but the below is here because it's interesting!
+
 To run as a background task, you'll need to use launchd and a tweek an included plist file.
 
 Look at [com.launched.weathergenerator.plist](./bin/com.launched.weathergenerator.plist) 
